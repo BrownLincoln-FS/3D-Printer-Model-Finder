@@ -1,8 +1,8 @@
-# [Your Project Name]
+# 3D Printer Model Finder
 
 ## Project Overview
 
-[Your Project Name] is a full-stack web application built to demonstrate secure user authentication using OAuth.
+3D Printer Model Finder is a full-stack web application built to demonstrate secure user authentication using OAuth.
 
 **Core Features & Functionality:**
 
@@ -48,4 +48,4 @@ Follow these instructions to get a local copy up and running.
 ## Links
 
 - **Local Build:** [http://localhost:3000](http://localhost:3000)
-- **GitHub Repository:** [Link to your repo]
+- **GitHub Repository:** [[GitHub Repo](https://github.com/BrownLincoln-FS/3D-Printer-Model-Finder)]
