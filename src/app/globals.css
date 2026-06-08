@@ -1,26 +1,104 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================
+   Base Layout
+========================================== */
+.page-wrapper {
+	@apply min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-300;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ==========================================
+   Navigation
+========================================== */
+.main-nav {
+	@apply w-full border-b border-slate-200 dark:border-slate-800 bg-white/75 dark:bg-slate-950/75 backdrop-blur-md sticky top-0 z-50;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.nav-container {
+	@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.logo {
+	@apply font-bold text-xl tracking-tight flex items-center gap-2;
+}
+
+.nav-link {
+	@apply text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors;
+}
+
+/* ==========================================
+   Hero Section
+========================================== */
+.hero-section {
+	@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col items-center text-center;
+}
+
+.status-badge {
+	@apply mb-8 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm font-medium border border-emerald-200 dark:border-emerald-500/20;
+}
+
+.hero-title {
+	@apply text-5xl md:text-7xl font-extrabold tracking-tight mb-6;
+}
+
+.text-highlight {
+	@apply text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300;
+}
+
+.hero-subtitle {
+	@apply max-w-2xl text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10;
+}
+
+.desktop-break {
+	@apply hidden sm:block;
+}
+
+/* ==========================================
+   Auth Card & Buttons
+========================================== */
+.auth-card {
+	@apply w-full max-w-md bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800;
+}
+
+.btn-google {
+	@apply w-full flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-semibold rounded-xl transition-all duration-200 active:scale-[0.98];
+}
+
+.auth-disclaimer {
+	@apply mt-4 text-xs text-slate-500 text-center;
+}
+
+/* ==========================================
+   Interactive Elements
+========================================== */
+.theme-toggle-btn {
+	@apply fixed bottom-6 left-6 p-3 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-yellow-400 shadow-lg border border-slate-200 dark:border-slate-700 hover:scale-110 active:scale-95 transition-all duration-200 z-50;
+}
+
+/* ==========================================
+   Icons
+========================================== */
+.logo-icon {
+	@apply w-6 h-6 text-emerald-600 dark:text-emerald-500;
+}
+
+.google-icon {
+	@apply w-5 h-5;
+}
+
+/* ==========================================
+   Auth State Elements
+========================================== */
+.auth-user-info {
+	@apply flex flex-col items-center gap-4;
+}
+
+.auth-user-text {
+	@apply font-semibold text-emerald-600 dark:text-emerald-400;
+}
+
+.btn-signout {
+	@apply w-full px-8 py-3 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 font-semibold rounded-xl transition-colors;
 }
