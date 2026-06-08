@@ -26,8 +26,8 @@ Follow these instructions to get a local copy up and running.
 
 1. **Clone the repository:**
 
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/BrownLincoln-FS/3D-Printer-Model-Finder.git
+    cd model-finder
 
 2. **Install NPM packages:**
 
