@@ -35,7 +35,7 @@ Follow these instructions to get a local copy up and running.
     npm install
 
 3. **Configure Environment Variables:**
-   Create a file named `.env.local` in the root of the project.
+   Create a file named `.env` in the root of the project.
    Add the required variables (see example below):
 
     DATABASE_URL="postgresql://user:password@localhost:5432/yourdbname"
