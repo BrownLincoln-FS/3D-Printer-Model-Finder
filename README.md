@@ -59,32 +59,21 @@ A custom theme that I call Aurora Glass
 
 ## Getting Started
 
-### Prerequisites
+Follow these instructions to get a local copy up and running.
 
-Make sure you have the following installed:
+1. **Clone the repository:**
 
-- Node.js (latest LTS recommended)
-- npm
-- PostgreSQL
+    git clone https://github.com/BrownLincoln-FS/3D-Printer-Model-Finder.git
 
----
+    cd model-finder
 
-### 1. Clone the Repository
+2. **Install NPM packages:**
 
-```bash
-git clone https://github.com/BrownLincoln-FS/AudioStream.git
-cd AudioStream
-```
+    npm install
 
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure Environment Variables
-
-Create a `.env` file in the project root:
+3. **Configure Environment Variables:**
+   Create a file named `.env.local` in the root of the project.
+   Add the required variables (see example below):
 
 ```env
 DATABASE_URL="postgresql://username:password@localhost:5432/audiostream"
