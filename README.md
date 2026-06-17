@@ -71,10 +71,16 @@ Make sure you have the following installed:
 
 ### 1. Clone the Repository
 
+<<<<<<< HEAD
 ```bash
 git clone https://github.com/BrownLincoln-FS/AudioStream.git
 cd AudioStream
 ```
+=======
+3. **Configure Environment Variables:**
+   Create a file named `.env` in the root of the project.
+   Add the required variables (see example below):
+>>>>>>> dae241fbf01b15ceb39775328c059ef5f1fc7c5f
 
 ### 2. Install Dependencies
 
