@@ -1,13 +1,15 @@
+// THE ENGINE
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"] 
 }
 
+// THE CONNECTION
 datasource db {
   provider = "postgresql"
 }
 
-// NextAuth Required Tables (For Google Login)
-
+// NEXTAUTH ESSENTIALS (Required for Google OAuth)
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -43,6 +45,9 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  
+  // A user can save many tracks
+  savedTracks   Track[]   
 }
 
 model VerificationToken {
@@ -53,14 +58,17 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Application Tables (For 3D Model Finder)
+// NEW MUSIC ARCHITECTURE
+model Track {
+  id           String   @id @default(cuid())
+  videoId      String   @unique 
+  title        String
+  artist       String   
+  thumbnailUrl String   
+  
+  // Linked to the NextAuth User model
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model Model3D {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  thumbnail   String   // URL to the image of the model
-  externalUrl String   // Link to MakerWorld/Printables
-  tags        String[] // E.g., ["articulated", "dragon", "toy"]
-  createdAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
 }

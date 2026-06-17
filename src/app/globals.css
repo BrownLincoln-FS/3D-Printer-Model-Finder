@@ -1,42 +1,137 @@
 @import "tailwindcss";
+@tailwind utilities;
 
 @custom-variant dark (&:is(.dark *));
 
 /* ==========================================
-   Base Layout
+   Base Body (The Solid Wall)
+========================================== */
+html {
+	@apply h-full antialiased;
+}
+
+body {
+	@apply bg-slate-50 dark:bg-[#020617] transition-colors duration-700 min-h-full flex flex-col;
+}
+
+/* ==========================================
+   Aurora Animated Background (Cranked to 11)
 ========================================== */
 .page-wrapper {
-	@apply min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-300;
+	@apply min-h-screen text-slate-900 dark:text-slate-50 relative overflow-x-hidden flex flex-col w-full;
+	z-index: 0;
+}
+
+/* The Ambient Glowing Orbs */
+.page-wrapper::before,
+.page-wrapper::after {
+	content: "";
+	position: fixed;
+	border-radius: 50%;
+	filter: blur(60px); /* Tighter blur makes the color core much punchier */
+	z-index: -1;
+	pointer-events: none;
+	mix-blend-mode: multiply; /* Secret sauce: aggressively stains the Light Mode background */
+	animation: floatOrb 14s infinite ease-in-out alternate;
+}
+
+/* Dark Mode specific blending so it glows instead of staining */
+.dark .page-wrapper::before,
+.dark .page-wrapper::after {
+	mix-blend-mode: screen;
+	filter: blur(90px); /* Softer glow for the dark mode abyss */
+}
+
+/* Top Left Orb - High Energy Cyan */
+.page-wrapper::before {
+	width: 70vw; /* Massively increased size */
+	height: 70vw;
+	top: -20%;
+	left: -10%;
+	/* Cranking the alpha channel to 0.85 for intense color */
+	background: radial-gradient(
+		circle,
+		rgba(6, 182, 212, 0.85) 0%,
+		rgba(6, 182, 212, 0) 65%
+	);
+}
+
+/* Bottom Right Orb - Deep Violet */
+.page-wrapper::after {
+	width: 80vw;
+	height: 80vw;
+	bottom: -20%;
+	right: -20%;
+	background: radial-gradient(
+		circle,
+		rgba(139, 92, 246, 0.85) 0%,
+		rgba(139, 92, 246, 0) 65%
+	);
+	animation-duration: 22s;
+	animation-delay: -10s;
+	animation-direction: alternate-reverse;
+}
+
+/* Aggressive, screen-crossing keyframes */
+@keyframes floatOrb {
+	0% {
+		transform: translate(0, 0) scale(1);
+		opacity: 0.6;
+	}
+	50% {
+		/* Forces the orbs to travel massive distances across the screen */
+		transform: translate(35vw, 25vh) scale(1.4);
+		opacity: 1; /* Pulses to maximum brightness mid-screen */
+	}
+	100% {
+		transform: translate(-20vw, 35vh) scale(0.9);
+		opacity: 0.7;
+	}
+}
+
+/* ==========================================
+   Glassmorphism Utility
+========================================== */
+@utility glass-panel {
+	@apply bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/50 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
 }
 
 /* ==========================================
    Navigation
 ========================================== */
 .main-nav {
-	@apply w-full border-b border-slate-200 dark:border-slate-800 bg-white/75 dark:bg-slate-950/75 backdrop-blur-md sticky top-0 z-50;
+	@apply w-full glass-panel border-b sticky top-0 z-50;
 }
 
 .nav-container {
 	@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between;
 }
 
-.logo {
-	@apply font-bold text-xl tracking-tight flex items-center gap-2;
+.logo-link {
+	@apply font-bold text-xl tracking-tight flex items-center gap-2 text-current no-underline;
 }
 
 .nav-link {
-	@apply text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors;
+	@apply text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors;
+}
+
+.nav-links {
+	@apply flex items-center gap-8 mr-auto ml-12;
+}
+
+.user-controls {
+	@apply flex items-center gap-4;
 }
 
 /* ==========================================
    Hero Section
 ========================================== */
 .hero-section {
-	@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col items-center text-center;
+	@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col items-center text-center relative;
 }
 
 .status-badge {
-	@apply mb-8 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm font-medium border border-emerald-200 dark:border-emerald-500/20;
+	@apply mb-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel text-cyan-700 dark:text-cyan-300 text-sm font-medium;
 }
 
 .hero-title {
@@ -44,11 +139,11 @@
 }
 
 .text-highlight {
-	@apply text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300;
+	@apply text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-violet-500;
 }
 
 .hero-subtitle {
-	@apply max-w-2xl text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10;
+	@apply max-w-2xl text-lg md:text-xl text-slate-700 dark:text-slate-300 mb-10 leading-relaxed;
 }
 
 .desktop-break {
@@ -56,49 +151,280 @@
 }
 
 /* ==========================================
+   Home Features Grid
+========================================== */
+.features-grid {
+	@apply grid grid-cols-1 md:grid-cols-3 gap-8 w-full mt-12;
+}
+
+.feature-card {
+	@apply w-full glass-panel p-6 rounded-3xl text-left hover:-translate-y-1 transition-transform duration-300;
+}
+
+.feature-title {
+	@apply font-bold text-xl mb-2 text-slate-900 dark:text-white;
+}
+
+.feature-text {
+	@apply text-sm text-slate-600 dark:text-slate-400;
+}
+
+/* ==========================================
    Auth Card & Buttons
 ========================================== */
-.auth-card {
-	@apply w-full max-w-md bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800;
+@utility signin-main {
+	@apply flex items-center justify-center p-6 flex-1 w-full z-10;
 }
 
-.btn-google {
-	@apply w-full flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-semibold rounded-xl transition-all duration-200 active:scale-[0.98];
+@utility auth-card {
+	@apply w-full max-w-md glass-panel p-10 rounded-3xl flex flex-col items-center;
 }
 
-.auth-disclaimer {
-	@apply mt-4 text-xs text-slate-500 text-center;
+@utility auth-logo-wrapper {
+	@apply w-16 h-16 bg-cyan-500/10 dark:bg-cyan-500/20 rounded-2xl flex items-center justify-center mb-6 border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.2)];
+}
+
+@utility auth-title {
+	@apply text-2xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight;
+}
+
+@utility auth-subtitle {
+	@apply text-slate-900 dark:text-white text-center mb-8;
+}
+
+@utility btn-google {
+	@apply w-full flex items-center justify-center gap-3 px-8 py-4 bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 backdrop-blur-md text-slate-900 dark:text-white font-semibold rounded-2xl border border-white/50 dark:border-white/10 transition-all duration-300 active:scale-[0.98] shadow-lg hover:shadow-[0_0_20px_rgba(6,182,212,0.3)];
+}
+
+@utility auth-disclaimer {
+	@apply mt-6 text-xs text-slate-900 dark:text-white text-center;
 }
 
 /* ==========================================
-   Interactive Elements
+   Music Search & Player Elements
+========================================== */
+.search-main {
+	@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full min-h-screen flex flex-col;
+}
+
+.search-header {
+	@apply mb-12 text-center md:text-left;
+}
+
+.search-title {
+	@apply text-5xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight;
+}
+
+.search-bar-wrapper {
+	@apply flex gap-4 w-full max-w-2xl mb-12 mx-auto md:mx-0;
+}
+
+.search-input {
+	@apply flex-1 glass-panel text-slate-900 dark:text-white px-8 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all placeholder-slate-500;
+}
+
+.search-btn {
+	@apply bg-linear-to-r from-cyan-500 to-blue-600 text-white px-8 py-4 rounded-full font-bold hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all duration-300 disabled:opacity-50 active:scale-95 border border-white/10;
+}
+
+/* Music Grid */
+.track-grid {
+	@apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-32;
+}
+
+.track-card {
+	@apply glass-panel p-3 rounded-2xl transition-all duration-300 cursor-pointer hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] flex flex-col gap-3;
+}
+
+.track-image-wrapper {
+	@apply relative aspect-square w-full overflow-hidden rounded-xl shadow-lg;
+}
+
+.track-image {
+	@apply object-cover w-full h-full group-hover:scale-110 transition-transform duration-700;
+}
+
+.track-play-overlay {
+	@apply absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300;
+}
+
+.track-play-btn {
+	@apply w-14 h-14 bg-cyan-500 text-white rounded-full flex items-center justify-center pl-1 shadow-[0_0_20px_rgba(6,182,212,0.6)] transform translate-y-8 group-hover:translate-y-0 transition-all duration-300 ease-out;
+}
+
+.track-info {
+	@apply flex flex-col px-2 pb-1;
+}
+
+.track-title {
+	@apply font-bold text-slate-900 dark:text-white truncate text-base mb-0.5;
+}
+
+.track-artist {
+	@apply text-sm text-slate-500 dark:text-slate-400 truncate;
+}
+
+/* ==========================================
+   Interactive Elements & Icons
 ========================================== */
 .theme-toggle-btn {
-	@apply fixed bottom-6 left-6 p-3 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-yellow-400 shadow-lg border border-slate-200 dark:border-slate-700 hover:scale-110 active:scale-95 transition-all duration-200 z-50;
+	@apply fixed bottom-6 left-6 p-4 rounded-full glass-panel text-slate-800 dark:text-yellow-400 hover:scale-110 active:scale-95 transition-all duration-300 z-50 hover:shadow-[0_0_20px_rgba(250,204,21,0.3)];
 }
 
-/* ==========================================
-   Icons
-========================================== */
 .logo-icon {
-	@apply w-6 h-6 text-emerald-600 dark:text-emerald-500;
+	@apply w-6 h-6 text-cyan-500;
 }
 
 .google-icon {
 	@apply w-5 h-5;
 }
 
-/* ==========================================
-   Auth State Elements
-========================================== */
-.auth-user-info {
-	@apply flex flex-col items-center gap-4;
-}
-
-.auth-user-text {
-	@apply font-semibold text-emerald-600 dark:text-emerald-400;
-}
-
 .btn-signout {
-	@apply w-full px-8 py-3 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 font-semibold rounded-xl transition-colors;
+	@apply px-6 py-2 glass-panel hover:bg-red-500/10 hover:border-red-500/30 text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 font-semibold rounded-full transition-all duration-300;
+}
+
+/* ==========================================
+   Global Audio Player Elements
+========================================== */
+@utility player-expanded-wrapper {
+	@apply fixed inset-0 z-100 bg-[#020617]/95 backdrop-blur-3xl transition-transform duration-500 flex flex-col;
+}
+
+@utility player-header {
+	@apply h-20 px-8 flex items-center justify-between border-b border-white/10;
+}
+
+@utility btn-icon-circular {
+	@apply w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 text-white transition-all;
+}
+
+@utility view-mode-container {
+	@apply flex bg-white/5 p-1 rounded-full border border-white/10;
+}
+
+@utility btn-view-mode {
+	@apply px-6 py-2 rounded-full font-bold transition-all text-slate-400 hover:text-cyan-400;
+}
+
+@utility btn-view-mode-active {
+	@apply bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:text-black;
+}
+
+@utility player-main-content {
+	@apply flex-1 flex overflow-hidden;
+}
+
+@utility media-area {
+	@apply flex-1 flex items-center justify-center p-12 relative;
+}
+
+@utility yt-iframe-wrapper {
+	@apply w-full max-w-4xl aspect-video rounded-2xl shadow-2xl overflow-hidden transition-opacity duration-300;
+}
+
+@utility album-art-wrapper {
+	@apply w-full max-w-lg aspect-square relative rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden border border-white/10;
+}
+
+@utility info-panel {
+	@apply w-1/3 min-w-100 glass-panel border-l border-white/10 flex flex-col;
+}
+
+@utility tabs-header {
+	@apply flex justify-between px-8 py-6 border-b border-white/10;
+}
+
+@utility btn-tab {
+	@apply font-bold text-sm uppercase tracking-wider pb-2 border-b-2 transition-all border-transparent text-slate-500 hover:text-white;
+}
+
+@utility btn-tab-active {
+	@apply border-cyan-500 text-cyan-400 hover:text-cyan-400;
+}
+
+@utility panel-content {
+	@apply flex-1 overflow-y-auto p-8 text-white;
+}
+
+@utility lyrics-wrapper {
+	@apply space-y-4 text-center;
+}
+
+@utility lyrics-title {
+	@apply text-xl font-bold text-cyan-400 mb-8;
+}
+
+@utility lyrics-placeholder {
+	@apply text-slate-400 animate-pulse;
+}
+
+@utility player-docked {
+	@apply fixed bottom-0 left-0 right-0 h-24 glass-panel z-90 border-t border-white/10 flex items-center px-6 gap-6 transition-transform duration-500 cursor-pointer hover:bg-white/5;
+}
+
+@utility docked-left {
+	@apply flex items-center gap-4 w-1/4;
+}
+
+@utility docked-image-wrapper {
+	@apply w-14 h-14 relative rounded-md overflow-hidden shadow-md;
+}
+
+@utility docked-track-info {
+	@apply flex flex-col truncate;
+}
+
+@utility docked-title {
+	@apply font-bold text-white truncate;
+}
+
+@utility docked-artist {
+	@apply text-sm text-slate-400 truncate;
+}
+
+@utility docked-center {
+	@apply flex-1 flex justify-center items-center gap-6;
+}
+
+@utility btn-play-main {
+	@apply w-14 h-14 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)];
+}
+
+@utility docked-right {
+	@apply w-1/4 flex justify-end;
+}
+
+@utility btn-icon {
+	@apply text-slate-400 hover:text-white transition-colors;
+}
+
+/* ==========================================
+   Player State Utilities
+========================================== */
+@utility slide-up-open {
+	@apply translate-y-0;
+}
+
+@utility slide-up-closed {
+	@apply translate-y-full;
+}
+
+@utility element-visible {
+	@apply opacity-100 relative;
+}
+
+@utility element-hidden {
+	@apply hidden;
+}
+
+@utility player-control-bar {
+	@apply flex items-center justify-between w-full px-12 py-6 border-t border-white/10 bg-[#020617]/50;
+}
+
+@utility volume-slider {
+	@apply w-24 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-cyan-500;
+}
+
+@utility btn-nav {
+	@apply text-white hover:text-cyan-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed;
 }

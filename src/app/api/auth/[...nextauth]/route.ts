@@ -11,6 +11,7 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
   ],
+  
   session: {
     // Using JWTs makes route protection via Next.js Middleware much easier later
     strategy: "jwt" as const,

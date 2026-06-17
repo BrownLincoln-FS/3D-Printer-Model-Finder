@@ -1,52 +1,187 @@
-# 3D Printer Model Finder
+# AudioStream
 
-## Project Overview
+A modern, full-stack music streaming application that delivers a seamless and immersive listening experience. Built with a **Global Audio Shell** architecture, AudioStream enables users to search all of YouTube and stream audio (or video) through a persistent player, and generate AI-powered lyrics in real time.
 
-3D Printer Model Finder is a full-stack web application built to demonstrate secure user authentication using OAuth.
+---
 
-**Core Features & Functionality:**
+## ✨ Features
 
-- Secure user login via OAuth.
-- Protected routes that require authentication to view.
-- PostgreSQL database integration to store user session/profile data.
-- Full-stack implementation utilizing React/Next.js.
+### Global Audio Engine
 
-## Prerequisites
+- Persistent playback across the application.
+- Audio continues uninterrupted while navigating between pages.
+- Unified listening experience across Search, Library, and Home.
 
-To run this project locally, you will need the following installed on your machine:
+### Aurora Glass UI
 
-- **Node.js**: (e.g., v18.x or higher)
-- **npm** or **yarn**: (e.g., npm v9.x)
-- **PostgreSQL**: (Running locally on default port 5432)
-- **Web Browser**: Chrome, Firefox, Safari, or Edge.
+A custom theme that I call Aurora Glass
+
+- Modern glassmorphism-inspired design.
+- Animated ambient backgrounds.
+- Optimized for smooth performance and responsiveness.
+
+### YouTube Integration
+
+- Search the YouTube music catalog directly from the app.
+- Stream audio using the YouTube IFrame API.
+- Fast and reliable playback experience.
+
+### AI Lyric Generation
+
+- Generate lyrics in real time for any track.
+- Synchronized lyric display during playback.
+
+### Personal Library
+
+- Save and organize favorite tracks.
+- Persistent storage powered by PostgreSQL and Prisma ORM.
+
+### Secure Authentication
+
+- Google OAuth authentication.
+- User session management with NextAuth.js.
+
+---
+
+## Tech Stack
+
+| Category       | Technology                          |
+| -------------- | ----------------------------------- |
+| Framework      | Next.js 16 (App Router + Turbopack) |
+| Language       | TypeScript                          |
+| Styling        | Tailwind CSS v4                     |
+| Database       | PostgreSQL                          |
+| ORM            | Prisma                              |
+| Authentication | NextAuth.js                         |
+| Media Playback | YouTube IFrame API                  |
+
+---
 
 ## Getting Started
 
-Follow these instructions to get a local copy up and running.
+### Prerequisites
 
-1. **Clone the repository:**
+Make sure you have the following installed:
 
-    git clone https://github.com/BrownLincoln-FS/3D-Printer-Model-Finder.git
+- Node.js (latest LTS recommended)
+- npm
+- PostgreSQL
 
-    cd model-finder
+---
 
-2. **Install NPM packages:**
+### 1. Clone the Repository
 
-    npm install
+```bash
+git clone https://github.com/BrownLincoln-FS/AudioStream.git
+cd AudioStream
+```
 
-3. **Configure Environment Variables:**
-   Create a file named `.env` in the root of the project.
-   Add the required variables (see example below):
+### 2. Install Dependencies
 
-    DATABASE_URL="postgresql://user:password@localhost:5432/yourdbname"
-    OAUTH_CLIENT_ID="your_client_id"
-    OAUTH_CLIENT_SECRET="your_client_secret"
+```bash
+npm install
+```
 
-4. **Run the Development Server:**
+### 3. Configure Environment Variables
 
-    npm run dev
+Create a `.env` file in the project root:
 
-## Links
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/audiostream"
 
-- **Local Build:** [http://localhost:3000](http://localhost:3000)
-- **GitHub Repository:** [GitHub Repo](https://github.com/BrownLincoln-FS/3D-Printer-Model-Finder)
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your_generated_secret"
+
+YOUTUBE_API_KEY="your_youtube_api_key"
+```
+
+### 4. Initialize the Database
+
+```bash
+npx prisma db push
+npx prisma generate
+```
+
+### 5. Start the Development Server
+
+```bash
+npm run dev
+```
+
+The application will be available at:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## 📁 Project Structure
+
+```text
+AudioStream/
+├── prisma/
+│   └── schema.prisma          # Database schema and models
+│
+├── public/                    # Static assets
+│
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/          # NextAuth API routes
+│   │   │   ├── env-check/     # Environment validation endpoint
+│   │   │   └── youtube/       # YouTube integration endpoints
+│   │   │
+│   │   ├── search/
+│   │   │   ├── page.tsx
+│   │   │   └── SearchClient.tsx
+│   │   │
+│   │   ├── signin/
+│   │   │   └── page.tsx
+│   │   │
+│   │   ├── layout.tsx         # Root application layout
+│   │   ├── page.tsx           # Home page
+│   │   ├── globals.css        # Global styles
+│   │   └── favicon.ico
+│   │
+│   ├── components/
+│   │   ├── AuthProvider.tsx
+│   │   ├── GlobalPlayer.tsx   # Persistent audio player
+│   │   ├── SignOutButton.tsx
+│   │   └── ThemeToggle.tsx
+│   │
+│   ├── contexts/
+│   │   └── PlayerContext.tsx  # Global playback state
+│   │
+│   └── lib/
+│       └── prisma.ts          # Prisma client instance
+│
+├── .env.example               # Environment variable template
+├── next.config.ts
+├── prisma.config.ts
+├── package.json
+└── README.md
+```
+
+> Note: The exact structure may vary depending on the current project version.
+
+---
+
+## 🔗 Links
+
+### Local Development
+
+- http://localhost:3000
+
+### Repository
+
+- https://github.com/BrownLincoln-FS/AudioStream
+
+---
+
+```
+Built with ❤️ using Next.js, TypeScript, PostgreSQL, Prisma, and Tailwind CSS.
+```
