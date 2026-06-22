@@ -220,7 +220,7 @@ body {
 }
 
 .search-input {
-	@apply flex-1 glass-panel text-slate-900 dark:text-white px-8 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all placeholder-slate-500;
+	@apply flex-1 glass-panel text-slate-900 dark:text-white px-8 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all placeholder-slate-900 dark:placeholder-white;
 }
 
 .search-btn {
