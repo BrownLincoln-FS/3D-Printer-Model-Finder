@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { usePlayer } from '@/contexts/PlayerContext';
+import { usePlayer, Track } from '@/contexts/PlayerContext';
 
 interface YouTubePlayerInstance {
     loadVideoById(videoId: string): void;
@@ -52,21 +52,29 @@ const TAB_OPTIONS: TabOption[] = ['upnext', 'lyrics', 'related'];
 
 export default function GlobalPlayer() {
     const { 
-        currentTrack, nextTrack, prevTrack, hasNextTrack, hasPrevTrack, 
-        isExpanded, setIsExpanded, queue, currentIndex, jumpToTrack 
+        currentTrack, playTrack, nextTrack, prevTrack, hasNextTrack, hasPrevTrack, 
+        isExpanded, setIsExpanded, queue, currentIndex, jumpToTrack, clearQueue,
+        isLiked, toggleLike
     } = usePlayer();
     
     const playerRef = useRef<YouTubePlayerInstance | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [viewMode, setViewMode] = useState<'song' | 'video'>('video');
-    const [activeTab, setActiveTab] = useState<TabOption>('lyrics');
+    const [activeTab, setActiveTab] = useState<TabOption>('upnext');
     
     const [volume, setVolume] = useState<number>(80);
     const [progress, setProgress] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [isDragging, setIsDragging] = useState<boolean>(false);
 
-    // YouTube Initialization Loop
+    const [lyrics, setLyrics] = useState<string>('');
+    const [isFetchingLyrics, setIsFetchingLyrics] = useState<boolean>(false);
+    const [lyricsError, setLyricsError] = useState<string>('');
+    const fetchedLyricsTrackId = useRef<string | null>(null);
+
+    const [relatedTracks, setRelatedTracks] = useState<Track[]>([]);
+    const [isFetchingRelated, setIsFetchingRelated] = useState<boolean>(false);
+
     useEffect(() => {
         if (!currentTrack) return;
 
@@ -74,7 +82,6 @@ export default function GlobalPlayer() {
             if (!window.YT) return;
 
             if (playerRef.current) {
-                // Checks if the method has been injected yet
                 if (typeof playerRef.current.loadVideoById === 'function') {
                     playerRef.current.loadVideoById(currentTrack.videoId);
                 }
@@ -101,13 +108,11 @@ export default function GlobalPlayer() {
         }
     }, [currentTrack]);
 
-    // Timeline Sync Loop (Updates the slider as the song plays)
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
         if (isPlaying && !isDragging) {
             interval = setInterval(() => {
-                // Checks if the getCurrentTime method exists before scrubbing
                 if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
                     setProgress(playerRef.current.getCurrentTime() || 0);
                     setDuration(playerRef.current.getDuration() || 0);
@@ -120,6 +125,92 @@ export default function GlobalPlayer() {
         };
     }, [isPlaying, isDragging]);
 
+    useEffect(() => {
+        if (currentTrack && currentTrack.videoId !== fetchedLyricsTrackId.current) {
+            setLyrics('');
+            setLyricsError('');
+            fetchedLyricsTrackId.current = null;
+        }
+
+        if (!currentTrack) return;
+        if (fetchedLyricsTrackId.current === currentTrack.videoId) return;
+
+        let isMounted = true;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); 
+
+        const fetchLyrics = async () => {
+            setIsFetchingLyrics(true);
+            setLyricsError('');
+
+            try {
+                const res = await fetch(`/api/lyrics?artist=${encodeURIComponent(currentTrack.artist)}&title=${encodeURIComponent(currentTrack.title)}`, {
+                    signal: controller.signal
+                });
+                const data = await res.json();
+                
+                if (!isMounted) return;
+                if (!res.ok) throw new Error(data.error || 'Failed to fetch lyrics');
+                
+                setLyrics(data.lyrics);
+                fetchedLyricsTrackId.current = currentTrack.videoId; 
+            } catch (err) {
+                if (!isMounted) return;
+                if (err instanceof Error && err.name === 'AbortError') {
+                    setLyricsError('The lyrics database took too long to respond.');
+                } else {
+                    setLyricsError('Could not find lyrics for this track.');
+                }
+            } finally {
+                clearTimeout(timeoutId);
+                if (isMounted) setIsFetchingLyrics(false);
+            }
+        };
+
+        fetchLyrics();
+
+        return () => {
+            isMounted = false;
+            controller.abort(); 
+        };
+    }, [currentTrack]); 
+
+    useEffect(() => {
+        if (!currentTrack) return;
+
+        let isMounted = true;
+        
+        const fetchRelated = async () => {
+            setIsFetchingRelated(true);
+            try {
+                const res = await fetch(`/api/youtube/search?q=${encodeURIComponent(currentTrack.artist + ' music')}`);
+                
+                // Soft exit
+                if (!res.ok) {
+                    console.warn(`Related tracks API failed with status: ${res.status}`);
+                    return; 
+                }
+                
+                const data = await res.json();
+                if (!isMounted) return;
+
+                const filteredTracks = data.filter((t: Track) => t.videoId !== currentTrack.videoId);
+                setRelatedTracks(filteredTracks);
+            } catch (error) {
+                console.warn("Failed to fetch related tracks:", error);
+            } finally {
+                if (isMounted) setIsFetchingRelated(false);
+            }
+        };
+
+        fetchRelated();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [currentTrack]); 
+
+
     const formatTime = (time: number) => {
         if (!time || isNaN(time)) return "0:00";
         const minutes = Math.floor(time / 60);
@@ -127,7 +218,6 @@ export default function GlobalPlayer() {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
-    // --- SEEK BAR DRAG HANDLERS ---
     const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setIsDragging(true);
         setProgress(parseFloat(e.target.value));
@@ -139,7 +229,6 @@ export default function GlobalPlayer() {
             playerRef.current.seekTo(progress, true);
         }
     };
-    // ------------------------------
 
     const handlePrevClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -202,14 +291,16 @@ export default function GlobalPlayer() {
         }
     };
 
-    // --- REUSABLE UI COMPONENTS ---
+    // --- NEW: Dynamic Like Status ---
+    const currentlyLiked = currentTrack ? isLiked(currentTrack.videoId) : false;
+
     const playbackControls = (
         <>
-            <button onClick={handlePrevClick} className="btn-nav hover:scale-110 transition-transform">
+            <button onClick={handlePrevClick} className="btn-nav hover-scale">
                 <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
             </button>
             
-            <button onClick={togglePlay} className="btn-play-main w-12 h-12">
+            <button onClick={togglePlay} className="btn-play-main">
                 {isPlaying ? (
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 ) : (
@@ -217,15 +308,37 @@ export default function GlobalPlayer() {
                 )}
             </button>
             
-            <button onClick={handleNextClick} className="btn-nav hover:scale-110 transition-transform">
+            <button onClick={handleNextClick} className="btn-nav hover-scale">
                 <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+
+            {/* Thumbs Up Button (Outline Only) */}
+            <button 
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (currentTrack) toggleLike(currentTrack);
+                }} 
+                className={`btn-nav hover-scale transition-colors ml-2 ${currentlyLiked ? 'text-cyan-400' : 'text-slate-400 hover:text-white'}`}
+            >
+                <svg 
+                    className="w-6 h-6 transition-all" 
+                    viewBox="0 0 24 24" 
+                    fill="none" //
+                    stroke="currentColor"
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                >
+                    <path d="M7 10v12"/>
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/>
+                </svg>
             </button>
         </>
     );
 
     const seekBarUI = (
-        <div className="flex items-center gap-3 w-full px-4" onClick={(e) => e.stopPropagation()}>
-            <span className="text-xs text-slate-400 w-10 text-right">{formatTime(progress)}</span>
+        <div className="seek-bar-wrapper" onClick={(e) => e.stopPropagation()}>
+            <span className="seek-bar-time">{formatTime(progress)}</span>
             <input
                 type="range"
                 min={0}
@@ -234,12 +347,11 @@ export default function GlobalPlayer() {
                 onChange={handleSeekChange}
                 onMouseUp={handleSeekMouseUp}
                 onTouchEnd={handleSeekMouseUp}
-                className="flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-cyan-500 hover:h-1.5 transition-all"
+                className="seek-bar-input"
             />
-            <span className="text-xs text-slate-400 w-10">{formatTime(duration)}</span>
+            <span className="seek-bar-time">{formatTime(duration)}</span>
         </div>
     );
-    // ------------------------------
 
     if (!currentTrack) return null;
 
@@ -288,49 +400,115 @@ export default function GlobalPlayer() {
                             ))}
                         </div>
                         <div className="panel-content">
+                            {/* Up Next Tab */}
                             {activeTab === 'upnext' && (
-                                <div className="space-y-2">
-                                    {queue.length > 0 ? (
-                                        queue.map((track, index) => (
-                                            <div 
-                                                key={`${track.videoId}-${index}`}
-                                                onClick={() => jumpToTrack(index)}
-                                                className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all ${
-                                                    index === currentIndex 
-                                                        ? 'bg-cyan-500/20 border border-cyan-500/50' 
-                                                        : 'hover:bg-white/5 border border-transparent'
-                                                }`}
-                                            >
-                                                <div className="relative w-12 h-12 shrink-0 rounded-md overflow-hidden shadow-md">
-                                                    <Image src={track.thumbnailUrl} alt={track.title} fill className="object-cover" />
-                                                    {index === currentIndex && (
-                                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                                            <svg className="w-5 h-5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                                                        </div>
-                                                    )}
+                                <div className="queue-container">
+                                    <div className="queue-header">
+                                        <span className="queue-title">Playing Next</span>
+                                        {queue.length > 1 && (
+                                            <button onClick={clearQueue} className="btn-queue-clear">
+                                                Clear
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="queue-list">
+                                        {queue.length > 0 ? (
+                                            queue.map((track, index) => (
+                                                <div 
+                                                    key={`${track.videoId}-${index}`}
+                                                    onClick={() => jumpToTrack(index)}
+                                                    className={`queue-item ${index === currentIndex ? 'queue-item-active' : 'queue-item-default'}`}
+                                                >
+                                                    <div className="queue-item-image-wrapper">
+                                                        <Image src={track.thumbnailUrl} alt={track.title} fill sizes="48px" className="object-cover" />
+                                                        {index === currentIndex && (
+                                                            <div className="queue-item-overlay">
+                                                                <svg className="w-5 h-5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="queue-item-info">
+                                                        <span className={`queue-item-title ${index === currentIndex ? 'queue-item-title-active' : 'queue-item-title-default'}`}>
+                                                            {track.title}
+                                                        </span>
+                                                        <span className="queue-item-artist">
+                                                            {track.artist}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-col truncate">
-                                                    <span className={`truncate font-medium ${index === currentIndex ? 'text-cyan-400' : 'text-white'}`}>
-                                                        {track.title}
-                                                    </span>
-                                                    <span className="text-sm text-slate-400 truncate">
-                                                        {track.artist}
-                                                    </span>
-                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="queue-empty">
+                                                <p>Your queue is empty.</p>
                                             </div>
-                                        ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Lyrics Tab */}
+                            {activeTab === 'lyrics' && (
+                                <div className="lyrics-container">
+                                    {isFetchingLyrics ? (
+                                        <div className="lyrics-loading-wrapper">
+                                            <div className="spinner"></div>
+                                            <p className="font-medium animate-pulse">Searching database...</p>
+                                        </div>
+                                    ) : lyricsError ? (
+                                        <div className="lyrics-error">
+                                            {lyricsError}
+                                        </div>
+                                    ) : lyrics ? (
+                                        <div className="lyrics-text">
+                                            {lyrics}
+                                        </div>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center h-full text-slate-400 mt-12">
-                                            <p>Your queue is empty.</p>
+                                        <div className="lyrics-loading-wrapper">
+                                            <div className="spinner"></div>
+                                            <p className="font-medium">Preparing...</p>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {activeTab === 'lyrics' && (
-                                <div className="lyrics-wrapper">
-                                    <h3 className="lyrics-title">AI Lyric Generator</h3>
-                                    <p className="lyrics-placeholder">Waiting for backend integration...</p>
+                            {/* Related Tab */}
+                            {activeTab === 'related' && (
+                                <div className="queue-container">
+                                    <div className="queue-header">
+                                        <span className="queue-title">Similar Tracks</span>
+                                    </div>
+                                    <div className="queue-list">
+                                        {isFetchingRelated ? (
+                                            <div className="lyrics-loading-wrapper">
+                                                <div className="spinner"></div>
+                                                <p className="font-medium animate-pulse">Finding similar music...</p>
+                                            </div>
+                                        ) : relatedTracks.length > 0 ? (
+                                            relatedTracks.map((track) => (
+                                                <div 
+                                                    key={`related-${track.videoId}`}
+                                                    onClick={() => playTrack(track, [track])}
+                                                    className="queue-item queue-item-default"
+                                                >
+                                                    <div className="queue-item-image-wrapper">
+                                                        <Image src={track.thumbnailUrl} alt={track.title} fill sizes="48px" className="object-cover" />
+                                                    </div>
+                                                    <div className="queue-item-info">
+                                                        <span className="queue-item-title queue-item-title-default">
+                                                            {track.title}
+                                                        </span>
+                                                        <span className="queue-item-artist">
+                                                            {track.artist}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="queue-empty">
+                                                <p>No related tracks found.</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -338,19 +516,19 @@ export default function GlobalPlayer() {
                 </div>
 
                 {/* EXPANDED CONTROL BAR */}
-                <div className="player-control-bar flex-col gap-4">
-                    <div className="w-full max-w-3xl mx-auto">
+                <div className="player-control-bar player-control-bar-stacked">
+                    <div className="seek-bar-container">
                         {seekBarUI}
                     </div>
 
-                    <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-6">
+                    <div className="controls-row">
+                        <div className="controls-group">
                             {playbackControls}
                         </div>
-                        <div className="flex items-center gap-4">
-                            <span className="text-white font-bold">{currentTrack.title}</span>
+                        <div className="track-meta-group">
+                            <span className="track-meta-title">{currentTrack.title}</span>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="volume-group">
                             <input type="range" min="0" max="100" value={volume} onChange={handleVolumeChange} className="volume-slider" />
                         </div>
                     </div>
@@ -369,8 +547,8 @@ export default function GlobalPlayer() {
                     </div>
                 </div>
 
-                <div className="docked-center flex flex-col items-center justify-center w-1/3">
-                    <div className="flex gap-4 items-center mb-1">
+                <div className="docked-controls-wrapper">
+                    <div className="docked-controls-row">
                         {playbackControls}
                     </div>
                     {seekBarUI}
