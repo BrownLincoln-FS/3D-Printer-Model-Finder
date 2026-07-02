@@ -72,3 +72,17 @@ model Track {
 
   createdAt    DateTime @default(now())
 }
+
+model LikedTrack {
+  id           String   @id @default(uuid())
+  userId       String
+  videoId      String
+  title        String
+  artist       String
+  thumbnailUrl String
+  isPodcast    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  // Compound unique constraint to prevent duplicate likes
+  @@unique([userId, videoId])
+}

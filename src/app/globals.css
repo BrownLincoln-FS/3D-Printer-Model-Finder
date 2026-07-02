@@ -116,7 +116,7 @@ body {
 }
 
 .nav-links {
-	@apply flex items-center gap-8 mr-auto ml-12;
+	@apply flex items-center gap-8;
 }
 
 .user-controls {
@@ -220,7 +220,7 @@ body {
 }
 
 .search-input {
-	@apply flex-1 glass-panel text-slate-900 dark:text-white px-8 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all placeholder-slate-500;
+	@apply flex-1 glass-panel text-slate-900 dark:text-white px-8 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all placeholder-slate-900 dark:placeholder-white;
 }
 
 .search-btn {
@@ -262,6 +262,154 @@ body {
 
 .track-artist {
 	@apply text-sm text-slate-500 dark:text-slate-400 truncate;
+}
+
+/* ==========================================
+   Search Page UI Elements
+========================================== */
+.search-results-header {
+	@apply text-2xl font-bold text-slate-900 dark:text-white mb-6;
+}
+
+.search-error {
+	@apply text-red-500 mb-8;
+}
+
+/* 3-Dot Menu */
+.track-menu-wrapper {
+	@apply absolute top-3 right-3 z-20;
+}
+
+.btn-menu-trigger {
+	@apply w-8 h-8 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-black/80 backdrop-blur-md transition-all shadow-lg;
+}
+
+.menu-dropdown {
+	@apply absolute right-0 mt-2 w-40 bg-slate-800 border border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden z-30;
+}
+
+.btn-menu-item {
+	@apply w-full px-4 py-3 text-left text-sm text-white hover:bg-white/10 flex items-center gap-2 transition-colors;
+}
+
+/* ==========================================
+   Player Queue & Scrubber UI Elements
+========================================== */
+@utility queue-container {
+	@apply space-y-4;
+}
+
+@utility queue-header {
+	@apply flex items-center justify-between px-2 pb-2 border-b border-white/10;
+}
+
+@utility queue-title {
+	@apply text-sm font-bold text-slate-400 uppercase tracking-wider;
+}
+
+@utility btn-queue-clear {
+	@apply text-xs text-slate-400 hover:text-red-400 transition-colors px-3 py-1 rounded-full border border-transparent hover:border-red-400/30;
+}
+
+@utility queue-list {
+	@apply space-y-2;
+}
+
+@utility queue-item {
+	@apply flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all border;
+}
+
+@utility queue-item-default {
+	@apply hover:bg-white/5 border-transparent;
+}
+
+@utility queue-item-active {
+	@apply bg-cyan-500/20 border-cyan-500/50;
+}
+
+@utility queue-item-image-wrapper {
+	@apply relative w-12 h-12 shrink-0 rounded-md overflow-hidden shadow-md;
+}
+
+@utility queue-item-overlay {
+	@apply absolute inset-0 bg-black/50 flex items-center justify-center;
+}
+
+@utility queue-item-info {
+	@apply flex flex-col truncate;
+}
+
+@utility queue-item-title {
+	@apply truncate font-medium;
+}
+
+@utility queue-item-title-default {
+	@apply text-white;
+}
+
+@utility queue-item-title-active {
+	@apply text-cyan-400;
+}
+
+@utility queue-item-artist {
+	@apply text-sm text-slate-400 truncate;
+}
+
+@utility queue-empty {
+	@apply flex flex-col items-center justify-center h-full text-slate-400 mt-12;
+}
+
+/* Scrubber & Layout Utilities */
+@utility seek-bar-wrapper {
+	@apply flex items-center gap-3 w-full px-4;
+}
+
+@utility seek-bar-time {
+	@apply text-xs text-slate-400 w-10 text-right;
+}
+
+@utility seek-bar-input {
+	@apply flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-cyan-500 hover:h-1.5 transition-all;
+}
+
+@utility seek-bar-container {
+	@apply w-full max-w-3xl mx-auto;
+}
+
+@utility controls-row {
+	@apply flex items-center justify-between w-full;
+}
+
+@utility controls-group {
+	@apply flex items-center gap-6;
+}
+
+@utility track-meta-group {
+	@apply flex items-center gap-4;
+}
+
+@utility track-meta-title {
+	@apply text-white font-bold;
+}
+
+@utility volume-group {
+	@apply flex items-center gap-4;
+}
+
+@utility docked-controls-wrapper {
+	@apply flex flex-col items-center justify-center w-1/3;
+}
+
+@utility docked-controls-row {
+	@apply flex gap-4 items-center mb-1;
+}
+
+@utility player-control-bar-stacked {
+	@apply flex-col gap-4;
+}
+
+@utility hover-scale {
+	@apply hover:scale-110 transition-transform;
 }
 
 /* ==========================================
@@ -427,4 +575,214 @@ body {
 
 @utility btn-nav {
 	@apply text-white hover:text-cyan-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed;
+}
+
+/* ==========================================
+   Lyrics Tab & Search/Shared
+========================================== */
+@utility lyrics-container {
+	@apply flex flex-col h-full w-full p-6 overflow-y-auto;
+}
+@utility lyrics-text {
+	@apply text-slate-300 text-lg leading-relaxed whitespace-pre-wrap text-center font-medium font-sans pb-12;
+}
+@utility lyrics-loading-wrapper {
+	@apply flex flex-col items-center justify-center h-full space-y-4 text-cyan-400 mt-12;
+}
+@utility spinner {
+	@apply w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin;
+}
+@utility lyrics-error {
+	@apply text-red-400 text-center text-sm p-4 bg-red-400/10 rounded-lg border border-red-400/20 mt-8;
+}
+
+/* ==========================================
+   Library & Playlist Structure (Fixed)
+========================================== */
+@utility library-container {
+	@apply pb-32 pt-8 px-8 max-w-7xl mx-auto;
+}
+@utility library-header-title {
+	@apply text-4xl font-bold text-white mb-8 tracking-tight;
+}
+@utility library-empty-state {
+	@apply py-20 text-center text-slate-500 font-medium;
+}
+
+/* Tabs */
+@utility library-tabs-wrapper {
+	@apply flex items-center gap-6 border-b border-white/10 mb-8;
+}
+@utility library-tab {
+	@apply pb-4 text-lg font-medium text-slate-400 hover:text-white transition-colors relative;
+}
+@utility library-tab-active {
+	@apply text-white;
+}
+@utility library-tab-indicator {
+	@apply absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 rounded-t-full;
+}
+
+/* Playlist Cards */
+@utility playlist-grid {
+	@apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6;
+}
+@utility playlist-card {
+	@apply bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40;
+}
+@utility playlist-card-image {
+	@apply aspect-square w-full rounded-xl mb-4 overflow-hidden relative shadow-lg bg-slate-800;
+	@apply flex items-center justify-center;
+}
+@utility playlist-card-title {
+	@apply text-white font-bold text-lg truncate mb-1;
+}
+@utility playlist-card-subtitle {
+	@apply text-slate-400 text-sm font-medium truncate;
+}
+
+/* Playlist Detail Header */
+@utility playlist-header {
+	@apply flex flex-col md:flex-row items-end gap-8 mb-10;
+}
+@utility playlist-cover {
+	@apply w-48 h-48 md:w-60 md:h-60 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden shrink-0 bg-linear-to-br from-cyan-400 to-blue-600;
+	@apply flex items-center justify-center;
+}
+@utility playlist-info {
+	@apply flex-1;
+}
+@utility playlist-type {
+	@apply text-cyan-400 text-sm font-bold uppercase tracking-wider mb-2 block;
+}
+@utility playlist-title {
+	@apply text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter;
+}
+
+/* ==========================================
+   Track Components (Used in Search & Library)
+========================================== */
+@utility track-card {
+	@apply bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-xl cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40 relative;
+}
+@utility track-menu-wrapper {
+	@apply absolute top-2 right-2 z-30 flex items-center gap-1 transition-opacity;
+}
+@utility menu-dropdown {
+	@apply absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-white/10 rounded-lg shadow-2xl p-2 z-50;
+}
+@utility track-image-wrapper {
+	@apply aspect-square w-full rounded-lg mb-4 overflow-hidden relative shadow-lg bg-slate-800;
+}
+@utility track-image {
+	@apply object-cover;
+}
+@utility track-info {
+	@apply flex flex-col;
+}
+@utility track-title {
+	@apply text-white font-bold text-base truncate block;
+}
+@utility track-artist {
+	@apply text-slate-400 text-sm truncate block;
+}
+@utility track-play-overlay {
+	@apply absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center;
+}
+@utility track-play-btn {
+	@apply bg-cyan-500 text-slate-900 p-3 rounded-full shadow-lg transform scale-90 group-hover:scale-100 transition-transform;
+}
+
+/* ==========================================
+   Buttons & Actions
+========================================== */
+@utility btn-action-group {
+	@apply flex items-center gap-4;
+}
+@utility btn-action-primary {
+	@apply flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 px-6 py-3 rounded-full font-bold transition-transform hover:scale-105;
+}
+@utility btn-action-secondary {
+	@apply flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-full font-bold transition-colors;
+}
+@utility btn-back {
+	@apply flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors font-medium w-fit;
+}
+@utility btn-nav {
+	@apply p-2 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md transition-colors flex items-center justify-center;
+}
+@utility btn-menu-trigger {
+	@apply p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md transition-all;
+}
+@utility btn-menu-item {
+	@apply w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-white/10 rounded-md transition-colors flex items-center gap-2;
+}
+@utility btn-menu-item-danger {
+	@apply text-red-400 hover:text-red-300;
+}
+
+/* ==========================================
+   Icons & Dynamic States
+========================================== */
+@utility icon-sm {
+	@apply w-5 h-5;
+}
+@utility icon-md {
+	@apply w-6 h-6 transition-all;
+}
+@utility icon-lg {
+	@apply w-20 h-20 text-white drop-shadow-md transition-all;
+}
+@utility icon-xl {
+	@apply w-32 h-32 text-white drop-shadow-xl transition-all;
+}
+
+@utility btn-like-active {
+	@apply btn-nav text-cyan-400;
+}
+@utility btn-like-default {
+	@apply btn-nav text-slate-400;
+}
+
+@utility playlist-card-gradient {
+	@apply aspect-square w-full rounded-xl mb-4 overflow-hidden relative shadow-lg bg-linear-to-br from-cyan-400 to-blue-600 flex items-center justify-center;
+}
+
+/* ==========================================
+   Token Status Component Utilities
+========================================== */
+@utility token-ring-container {
+	@apply flex items-center gap-3 transition-opacity;
+}
+@utility token-text-wrapper {
+	@apply hidden md:flex flex-col items-end;
+}
+@utility token-label {
+	@apply text-[10px] font-bold text-slate-400 uppercase tracking-widest;
+}
+@utility token-value {
+	@apply text-xs font-mono;
+}
+@utility token-svg-wrapper {
+	@apply relative w-8 h-8 flex items-center justify-center;
+}
+@utility token-ring-bg {
+	@apply w-full h-full transform -rotate-90 absolute inset-0 text-white/10;
+}
+@utility token-ring-progress {
+	@apply transition-all duration-1000 ease-linear;
+}
+@utility token-dot {
+	@apply w-2 h-2 rounded-full absolute;
+}
+
+/* ==========================================
+   JWT Utilities
+========================================== */
+.user-controls-fixed {
+	@apply flex items-center gap-6 ml-auto; /* ml-auto forces this to the far right */
+}
+
+.nav-jwt-wrapper {
+	@apply flex items-center shrink-0;
 }
